@@ -188,8 +188,12 @@ console.log(borrowRecord);
 import type { BorrowStatus, MembershipType } from "./types";
 
 let status: BorrowStatus = "Borrowed";
-status = "Returned";;
 
+console.log(status);
+
+status = "Returned";
+
+console.log(status);
 
 const membership: MembershipType = "student";
 
