@@ -1,116 +1,143 @@
 // ===== INTERFACES =====
-// An interface defines the SHAPE of an object -- what fields it must have.
- 
-export interface User {
-  id:       number;
-  name:     string;
-  email:    string;
-  role:     "student" | "admin" | "instructor"; // only these values
-  isActive: boolean;
+// An interface defines the SHAPE of an object.
+
+export interface Book {
+  id: number;
+  title: string;
+  author: string;
+  genre: string;
+  available: boolean;
 }
- 
-export interface Course {
-  code:     string;
-  title:    string;
-  units:    number;
-  semester: string;
+
+export interface Member {
+  id: number;
+  name: string;
+  email: string;
+  membershipType: "student" | "faculty" | "guest";
+  active: boolean;
 }
- 
-export interface Submission {
-  id:          number;
-  studentId:   number;
-  courseCode:  string;
-  repoUrl:     string;
-  submittedAt: Date;
-  score?:      number;  // ? means this field is optional
+
+export interface BorrowRecord {
+  id: number;
+  memberId: number;
+  bookId: number;
+  borrowDate: Date;
+  returnDate: Date;
+  fine?: number; // optional
 }
 
 // ===== TYPE ALIASES =====
-// A type alias gives a name to any type -- primitives, unions, functions, objects
- 
-// Alias for a union type (string OR number)
+
+// Alias for a union type
 export type ID = number | string;
- 
+
 // Alias for an object shape
-export type Coordinate = {
-  x: number;
-  y: number;
+export type ShelfLocation = {
+  shelf: string;
+  row: number;
 };
- 
+
 // Alias for a function signature
 export type Formatter = (value: number) => string;
- 
-// Using them
-const studentId: ID = "S2026-001";
-const position: Coordinate = { x: 10, y: 20 };
-const formatScore: Formatter = (value) => `${value}%`;
- 
-console.log(studentId);          // S2026-001
-console.log(formatScore(95.5));  // 95.5%
 
-// ===== UNION TYPES -- One OR the other =====
+// Using them
+const bookId: ID = "BK-2026-001";
+const location: ShelfLocation = {
+  shelf: "A",
+  row: 3,
+};
+
+const formatFine: Formatter = (value) => `₱${value.toFixed(2)}`;
+
+console.log(bookId);
+console.log(formatFine(25));
+
+// ===== UNION TYPES =====
+
 export type StringOrNumber = string | number;
-export type Status         = "pending" | "active" | "inactive"; // literal union
- 
-// Function that accepts a union type
+
+export type BookStatus =
+  | "available"
+  | "borrowed"
+  | "reserved";
+
+// Function using a union type
 export function printId(id: StringOrNumber): void {
   console.log(`ID: ${id}`);
 }
+
 printId(101);
-printId("S2026-001");
- 
-// ===== INTERSECTION TYPES -- combines ALL properties =====
-// StudentWithCourse must have all User fields AND enrolledCourse AND gpa
-export type StudentWithCourse = User & {
-  enrolledCourse: Course;
-  gpa:            number;
-};
- 
-const topStudent: StudentWithCourse = {
-  id: 1, name: "Maria Santos", email: "m@example.com",
-  role: "student", isActive: true,
-  enrolledCourse: { code: "ITELECT4", title: "IT Elective 4", units: 3, semester: "1st" },
-  gpa: 1.25,
+printId("BK-2026-001");
+
+// ===== INTERSECTION TYPES =====
+
+// BookWithBorrower combines Book + extra properties
+export type BookWithBorrower = Book & {
+  borrowedBy: Member;
+  dueDate: Date;
 };
 
-// ----- types/index.ts -----
+const borrowedBook: BookWithBorrower = {
+  id: 1,
+  title: "The Hobbit",
+  author: "J.R.R. Tolkien",
+  genre: "Fantasy",
+  available: false,
+
+  borrowedBy: {
+    id: 101,
+    name: "Juan dela Cruz",
+    email: "juan@example.com",
+    membershipType: "student",
+    active: true,
+  },
+
+  dueDate: new Date(),
+};
+
 // ===== GENERIC INTERFACE =====
-// ApiResponse<T> can wrap ANY data type -- every future GT reuses this
+
 export interface ApiResponse<T> {
   success: boolean;
-  data:    T;
+  data: T;
   message?: string;
 }
- 
+
 // ===== UTILITY TYPES =====
-// Partial<T> -- every field becomes optional
-export type UserUpdate = Partial<User>;
- 
-// Pick<T, K> -- keep ONLY the listed fields
-export type UserPreview = Pick<User, "id" | "name" | "role">;
- 
-// Omit<T, K> -- keep every field EXCEPT the listed ones
-export type PublicUser = Omit<User, "email" | "isActive">;
- 
-// Record<K, T> -- a fixed set of keys, each mapped to the same value type
-export type RoleCount = Record<
-  "student" | "admin" | "instructor",
+
+// Partial<T>
+export type BookUpdate = Partial<Book>;
+
+// Pick<T,K>
+export type BookPreview = Pick<
+  Book,
+  "id" | "title" | "author"
+>;
+
+// Omit<T,K>
+export type PublicBook = Omit<
+  Book,
+  "available"
+>;
+
+// Record<K,T>
+export type GenreCount = Record<
+  "Fantasy" | "Science Fiction" | "Mystery",
   number
 >;
 
 // ===== ENUMS =====
- 
-// Regular enum -- exists at runtime; can be looped over or reverse-mapped
-export enum SubmissionStatus {
-  Pending,
-  Graded,
-  Late,
-}
- 
-// const enum -- inlined at compile time, zero runtime overhead
-export const enum Role {
-  Student    = "student",
-  Admin      = "admin",
-  Instructor = "instructor",
+
+// Regular enum
+export enum BorrowStatus {
+  Borrowed,
+  Returned,
+  Overdue,
 }
 
+// const enum
+export const enum MembershipType {
+  Student = "student",
+  Faculty = "faculty",
+  Guest = "guest",
+}
