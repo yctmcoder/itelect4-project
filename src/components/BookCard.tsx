@@ -6,9 +6,7 @@ interface BookCardProps {
 }
 
 function BookCard({ book, onBorrow }: BookCardProps) {
-  const handleBorrow = (
-    e: React.MouseEvent<HTMLButtonElement>
-  ): void => {
+  const handleBorrow = (): void => {
     onBorrow(book);
   };
 
