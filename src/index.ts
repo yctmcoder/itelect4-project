@@ -185,16 +185,12 @@ const borrowRecord: NewBorrowRecord = createBorrowRecord(1);
 console.log(borrowRecord);
 // ===== USING ENUMS =====
 
-import { BorrowStatus, MembershipType } from "./types";
+import type { BorrowStatus, MembershipType } from "./types";
 
-let status: BorrowStatus = BorrowStatus.Borrowed;
+let status: BorrowStatus = "Borrowed";
+status = "Returned";;
 
-console.log(BorrowStatus[status]);
 
-status = BorrowStatus.Returned;
-
-console.log(status === BorrowStatus.Returned);
-
-const membership: MembershipType = MembershipType.Student;
+const membership: MembershipType = "student";
 
 console.log(membership);

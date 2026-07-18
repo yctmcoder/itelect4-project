@@ -47,6 +47,8 @@ const location: ShelfLocation = {
   row: 3,
 };
 
+console.log(location);
+
 const formatFine: Formatter = (value) => `₱${value.toFixed(2)}`;
 
 console.log(bookId);
@@ -95,6 +97,10 @@ const borrowedBook: BookWithBorrower = {
   dueDate: new Date(),
 };
 
+console.log(
+  `${borrowedBook.title} is borrowed by ${borrowedBook.borrowedBy.name}. Due on ${borrowedBook.dueDate.toLocaleDateString()}`
+);
+
 // ===== GENERIC INTERFACE =====
 
 export interface ApiResponse<T> {
@@ -126,18 +132,16 @@ export type GenreCount = Record<
   number
 >;
 
-// ===== ENUMS =====
+// ===== STATUS TYPES =====
 
-// Regular enum
-export enum BorrowStatus {
-  Borrowed,
-  Returned,
-  Overdue,
-}
+// Replaces enum
+export type BorrowStatus =
+  | "Borrowed"
+  | "Returned"
+  | "Overdue";
 
-// const enum
-export const enum MembershipType {
-  Student = "student",
-  Faculty = "faculty",
-  Guest = "guest",
-}
+// Replaces const enum
+export type MembershipType =
+  | "student"
+  | "faculty"
+  | "guest";
