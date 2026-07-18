@@ -1,5 +1,5 @@
 // At the TOP of src/index.ts
-import type { User, Course, Submission } from "../types/index";
+import type { User, Course, Submission } from "./types";
  
 // ... (your previous code) ...
  
@@ -68,7 +68,7 @@ function throwError(message: string): never {
 }
 
 // ===== TYPE NARROWING =====
-import type { StringOrNumber } from "../types/index";
+import type { StringOrNumber } from "./types";
  
 // Narrowing with typeof
 // Without the if-check, TypeScript would error:
@@ -113,7 +113,7 @@ const foundUser  = getById<User>([student], 1);
 console.log(firstUser?.name);   // Juan dela Cruz
 console.log(foundUser?.email); // juan@example.com
 
-import type { ApiResponse } from "../types/index";
+import type { ApiResponse } from "./types";
  
 const userResponse: ApiResponse<User> = {
   success: true,
@@ -128,7 +128,7 @@ const courseResponse: ApiResponse<Course[]> = {
 console.log(userResponse.data.name); // Juan dela Cruz
 
 // ===== USING UTILITY TYPES =====
-import { UserUpdate, UserPreview, PublicUser, RoleCount } from "../types/index";
+import { UserUpdate, UserPreview, PublicUser, RoleCount } from "./types";
  
 // Partial<T> -- update payload only needs the changed fields
 const patch: UserUpdate = { name: "Juan D. Cruz" };
@@ -152,7 +152,7 @@ type NewSubmission = ReturnType<typeof makeSubmission>;
 const gt1Submission: NewSubmission = makeSubmission("ITELECT4");
 
 // ===== USING ENUMS =====
-import { SubmissionStatus, Role } from "../types/index";
+import { SubmissionStatus, Role } from "./types";
  
 let status: SubmissionStatus = SubmissionStatus.Pending;
 console.log(SubmissionStatus[status]); // "Pending" -- reverse mapping
