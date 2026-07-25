@@ -6,6 +6,9 @@ import BookCard from "./components/BookCard";
 import MemberCard from "./components/MemberCard";
 import BorrowRecordCard from "./components/BorrowCard";
 
+import useToggle from "./hooks/useToggle";
+import usePrevious from "./hooks/usePrevious";
+
 import type {
   Book,
   Member,
@@ -18,27 +21,32 @@ function App() {
   // Stores the currently selected book
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
-  // Array state -- stores library books
+  // Stores library books
   const [books, setBooks] = useState<Book[]>([]);
 
-  // Array state -- stores borrowed books
+  // Stores borrowed books
   const [borrowedBooks, setBorrowedBooks] = useState<Book[]>([]);
 
-  // Boolean state -- tracks whether library data is loading
+  // Tracks whether library data is loading
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Search state -- stores the current search text
+  // Stores the current search text
   const [searchTerm, setSearchTerm] = useState<string>("");
+
+  // ===== CUSTOM useToggle HOOK =====
+
+  // Controls whether borrowed books are displayed
+  const [showBorrowedBooks, toggleBorrowedBooks] = useToggle(false);
+
+  // ===== CUSTOM usePrevious HOOK =====
+
+  // Stores the previous search term
+  const previousSearch = usePrevious(searchTerm);
 
   // ===== TYPED DOM REFERENCE WITH useRef =====
 
-  // useRef<T>(null) -- T is the DOM element type
+  // Reference to the book search input
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  // Focus the search input programmatically
-  const focusSearch = (): void => {
-    searchInputRef.current?.focus();
-  };
 
   // ===== MOCK DATA =====
 
@@ -69,19 +77,18 @@ function App() {
 
   // ===== LOADING MOCK DATA WITH useEffect =====
 
-  // useEffect(fn, deps) -- fn runs after render;
-  // an empty deps array [] means "run once, on mount"
+  // Runs once when the component mounts
   useEffect(() => {
     setTimeout(() => {
-      // Reusing GT1's book mock data as the "fetched" result
+      // Simulate fetched library data
       setBooks([book]);
       setIsLoading(false);
     }, 500);
   }, []);
 
-  // ===== TYPED DOM EVENTS INSIDE HOOKS =====
+  // ===== TYPED DOM EVENT =====
 
-  // React.ChangeEvent<HTMLInputElement> types e.target as an <input>
+  // Handles changes to the search input
   const handleSearchChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ): void => {
@@ -90,14 +97,21 @@ function App() {
 
   // ===== FILTERED BOOKS =====
 
-  // Derived value -- recomputed every render,
-  // not stored in state
+  // Filters books based on the search term
   const filteredBooks = books.filter((b) =>
     b.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // ===== TYPED DOM REFERENCE FUNCTION =====
+
+  // Focus the search input programmatically
+  const focusSearch = (): void => {
+    searchInputRef.current?.focus();
+  };
+
   // ===== TYPED EVENT HANDLER =====
 
+  // Handles borrowing a book
   const handleBorrow = (book: Book): void => {
     setSelectedBook(book);
 
@@ -115,17 +129,19 @@ function App() {
     return <p>Loading library books...</p>;
   }
 
+  // ===== FINAL DYNAMIC UI RENDER =====
+
   return (
     <div className="app">
       <h1>📚 Library App</h1>
 
-      {/* ===== SEARCH BOOKS WITH useRef AND useState ===== */}
+      {/* ===== SEARCH BOOKS ===== */}
 
       <input
         ref={searchInputRef}
+        value={searchTerm}
         type="text"
         placeholder="Search books..."
-        value={searchTerm}
         onChange={handleSearchChange}
       />
 
@@ -133,57 +149,84 @@ function App() {
         Focus Search
       </button>
 
-      {/* Library Books */}
+      {/* ===== PREVIOUS SEARCH ===== */}
+
+      {previousSearch !== undefined &&
+        previousSearch !== searchTerm && (
+          <p>
+            Previous search: "{previousSearch}"
+          </p>
+        )}
+
+      {/* ===== AVAILABLE BOOKS ===== */}
+
       <h2>Available Books</h2>
 
-      {filteredBooks.length > 0 ? (
-        filteredBooks.map((libraryBook) => (
-          <BookCard
-            key={libraryBook.id}
-            book={libraryBook}
-            onBorrow={handleBorrow}
-          />
-        ))
-      ) : (
-        <p>No books found matching "{searchTerm}".</p>
+      {filteredBooks.map((libraryBook) => (
+        <BookCard
+          key={libraryBook.id}
+          book={libraryBook}
+          onBorrow={handleBorrow}
+        />
+      ))}
+
+      {/* ===== NO SEARCH RESULTS ===== */}
+
+      {filteredBooks.length === 0 && (
+        <p>
+          No books found matching "{searchTerm}".
+        </p>
       )}
 
-      {/* Member */}
+      {/* ===== MEMBER ===== */}
+
       <MemberCard
         member={member}
       />
 
-      {/* Borrow Record */}
+      {/* ===== SELECTED BOOK ===== */}
+
+      {selectedBook && (
+        <p>
+          Selected: {selectedBook.title}
+        </p>
+      )}
+
+      {/* ===== BORROW RECORD ===== */}
+
       <BorrowRecordCard
         record={borrowRecord}
       >
         <p>No overdue books.</p>
       </BorrowRecordCard>
 
-      {/* Selected Book */}
-      <h2>Selected Book</h2>
+      {/* ===== BORROWED BOOKS TOGGLE ===== */}
 
-      {selectedBook ? (
-        <p>
-          Selected: {selectedBook.title}
-        </p>
-      ) : (
-        <p>No book selected.</p>
-      )}
+      <button onClick={toggleBorrowedBooks}>
+        {showBorrowedBooks
+          ? "Hide Borrowed Books"
+          : "Show Borrowed Books"}
+      </button>
 
-      {/* Borrowed Books */}
-      <h2>Borrowed Books</h2>
+      {/* ===== BORROWED BOOKS ===== */}
 
-      {borrowedBooks.length > 0 ? (
-        <ul>
-          {borrowedBooks.map((borrowedBook, index) => (
-            <li key={`${borrowedBook.id}-${index}`}>
-              {borrowedBook.title} by {borrowedBook.author}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No books have been borrowed yet.</p>
+      {showBorrowedBooks && (
+        <>
+          <h2>Borrowed Books</h2>
+
+          {borrowedBooks.length > 0 ? (
+            <ul>
+              {borrowedBooks.map((borrowedBook, index) => (
+                <li key={`${borrowedBook.id}-${index}`}>
+                  {borrowedBook.title} by{" "}
+                  {borrowedBook.author}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No books have been borrowed yet.</p>
+          )}
+        </>
       )}
     </div>
   );
