@@ -1,18 +1,25 @@
-import type { Member } from "../types";
+import type { BorrowRecord } from "../types";
 
-interface MemberCardProps {
-  member: Member;
+interface BorrowRecordCardProps {
+  record: BorrowRecord;
+  children?: React.ReactNode;
 }
 
-function MemberCard({ member }: MemberCardProps) {
+const BorrowRecordCard: React.FC<BorrowRecordCardProps> = ({
+  record,
+  children,
+}) => {
   return (
-    <div className="member-card">
-      <h3>{member.name}</h3>
-      <p>{member.email}</p>
-      <p>Membership: {member.membershipType}</p>
-      <p>{member.active ? "Active" : "Inactive"}</p>
+    <div className="borrow-record-card">
+      <h3>Borrow Record #{record.id}</h3>
+      <p>Book ID: {record.bookId}</p>
+      <p>Member ID: {record.memberId}</p>
+      <p>Borrowed: {record.borrowDate.toLocaleDateString()}</p>
+      <p>Return: {record.returnDate.toLocaleDateString()}</p>
+
+      {children}
     </div>
   );
-}
+};
 
-export default MemberCard;
+export default BorrowRecordCard;
