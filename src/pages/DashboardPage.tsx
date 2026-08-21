@@ -1,31 +1,73 @@
 // src/pages/DashboardPage.tsx
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import type { Book } from "../types";
+import type { Book } from "../types/index";
 
 import BookCard from "../components/BookCard";
 import MemberCard from "../components/MemberCard";
 import useToggle from "../hooks/useToggle";
 
-import {
-  allBooks,
-  member,
-} from "../data/mockData";
+import { member } from "../data/mockData";
+import { fetchBooks } from "../api/client";
 
 function DashboardPage() {
-  // Stores the currently selected book
+  // ===== FETCH BOOKS =====
+
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+  } = useQuery<Book[]>({
+    queryKey: ["books"],
+    queryFn: fetchBooks,
+  });
+
+  // ===== SELECTED BOOK =====
+
   const [selectedBook, setSelectedBook] =
     useState<Book | null>(null);
 
-  // Controls whether details are displayed
+  // ===== DETAILS TOGGLE =====
+
   const [showDetails, toggleDetails] =
     useToggle(false);
 
-  // Handles borrowing a book
+  // ===== BORROW HANDLER =====
+
   const handleBorrow = (book: Book): void => {
     setSelectedBook(book);
   };
+
+  // ===== LOADING STATE =====
+
+  if (isPending) {
+    return (
+      <div className="animate-pulse p-6 text-gray-500 dark:text-gray-400">
+        Loading dashboard...
+      </div>
+    );
+  }
+
+  // ===== ERROR STATE =====
+
+  if (isError) {
+    return (
+      <div className="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+        <p className="font-semibold">
+          Could not load dashboard books.
+        </p>
+
+        <p className="mt-1 text-sm">
+          {error.message} -- is json-server running on port 3000?
+        </p>
+      </div>
+    );
+  }
+
+  // ===== PAGE UI =====
 
   return (
     <div>
@@ -39,7 +81,7 @@ function DashboardPage() {
 
         {/* ===== BOOK CARDS ===== */}
 
-        {allBooks.map((libraryBook) => (
+        {data.map((libraryBook: Book) => (
           <BookCard
             key={libraryBook.id}
             book={libraryBook}
@@ -73,7 +115,6 @@ function DashboardPage() {
             {selectedBook.author}
           </p>
         )}
-
     </div>
   );
 }

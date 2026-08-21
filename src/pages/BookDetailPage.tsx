@@ -1,57 +1,13 @@
 // src/pages/BookDetailPage.tsx
 
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router";
 
 import BookCard from "../components/BookCard";
 
-import type { Book } from "../types";
+import type { Book } from "../types/index";
 
-// ===== MOCK BOOK DATA =====
-
-const allBooks: Book[] = [
-  {
-    id: 1,
-    title: "The Hobbit",
-    author: "J.R.R. Tolkien",
-    genre: "Fantasy",
-    available: true,
-  },
-  {
-    id: 2,
-    title: "Harry Potter and the Sorcerer's Stone",
-    author: "J.K. Rowling",
-    genre: "Fantasy",
-    available: true,
-  },
-  {
-    id: 3,
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    genre: "Classic",
-    available: false,
-  },
-  {
-    id: 4,
-    title: "To Kill a Mockingbird",
-    author: "Harper Lee",
-    genre: "Fiction",
-    available: true,
-  },
-  {
-    id: 5,
-    title: "1984",
-    author: "George Orwell",
-    genre: "Dystopian",
-    available: true,
-  },
-  {
-    id: 6,
-    title: "Pride and Prejudice",
-    author: "Jane Austen",
-    genre: "Romance",
-    available: false,
-  },
-];
+import { fetchBookById } from "../api/client";
 
 function BookDetailPage() {
   // ===== GET BOOK ID FROM URL =====
@@ -62,23 +18,44 @@ function BookDetailPage() {
 
   const navigate = useNavigate();
 
-  // ===== FIND BOOK =====
+  // ===== FETCH BOOK =====
+  // The ID is included in the query key so each book
+  // gets its own React Query cache entry.
 
-  const book = allBooks.find(
-    (b) => b.id === Number(id)
-  );
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+  } = useQuery<Book>({
+    queryKey: ["books", id],
+    queryFn: () => fetchBookById(Number(id)),
+    enabled: id !== undefined,
+  });
 
-  // ===== BOOK NOT FOUND =====
+  // ===== LOADING STATE =====
 
-  if (book === undefined) {
+  if (isPending) {
     return (
-      <div className="rounded-lg bg-red-50 p-4 text-red-700">
+      <div className="animate-pulse p-6 text-gray-500 dark:text-gray-400">
+        Loading book...
+      </div>
+    );
+  }
+
+  // ===== ERROR STATE =====
+  // A missing/invalid book ID causes fetchBookById()
+  // to throw, and React Query places the error here.
+
+  if (isError) {
+    return (
+      <div className="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
         <h2 className="font-semibold">
           Book Not Found
         </h2>
 
         <p className="mt-1">
-          No book was found with ID "{id}".
+          {error.message}
         </p>
 
         <button
@@ -92,24 +69,24 @@ function BookDetailPage() {
   }
 
   // ===== BOOK DETAILS =====
+  // Below this point, data is guaranteed to be Book.
 
   return (
     <div>
-
       {/* ===== TITLE ===== */}
 
       <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
-        {book.title}
+        {data.title}
       </h2>
 
       {/* ===== BOOK CARD ===== */}
 
       <div className="max-w-sm">
         <BookCard
-          book={book}
+          book={data}
           onBorrow={() => {
             console.log(
-              `${book.title} has been borrowed.`
+              `${data.title} has been borrowed.`
             );
           }}
         />
@@ -118,43 +95,40 @@ function BookDetailPage() {
       {/* ===== ADDITIONAL INFORMATION ===== */}
 
       <div className="mt-4 max-w-sm rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-
         <h3 className="mb-3 font-semibold text-gray-900 dark:text-white">
           Book Information
         </h3>
 
         <div className="space-y-2 text-sm">
-
           <p className="text-gray-600 dark:text-gray-300">
             <span className="font-semibold">
               ID:
             </span>{" "}
-            {book.id}
+            {data.id}
           </p>
 
           <p className="text-gray-600 dark:text-gray-300">
             <span className="font-semibold">
               Author:
             </span>{" "}
-            {book.author}
+            {data.author}
           </p>
 
           <p className="text-gray-600 dark:text-gray-300">
             <span className="font-semibold">
               Genre:
             </span>{" "}
-            {book.genre}
+            {data.genre}
           </p>
 
           <p className="text-gray-600 dark:text-gray-300">
             <span className="font-semibold">
               Status:
             </span>{" "}
-            {book.available
+            {data.available
               ? "Available"
               : "Currently Borrowed"}
           </p>
-
         </div>
       </div>
 
@@ -166,7 +140,6 @@ function BookDetailPage() {
       >
         ← Back to Books
       </button>
-
     </div>
   );
 }

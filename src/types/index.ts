@@ -1,5 +1,9 @@
-// ===== INTERFACES =====
+// src/types/index.ts
+
+// ============================================================
+// INTERFACES
 // An interface defines the SHAPE of an object.
+// ============================================================
 
 export interface Book {
   id: number;
@@ -23,10 +27,13 @@ export interface BorrowRecord {
   bookId: number;
   borrowDate: Date;
   returnDate: Date;
-  fine?: number; // optional
+  fine?: number;
 }
 
-// ===== TYPE ALIASES =====
+
+// ============================================================
+// TYPE ALIASES
+// ============================================================
 
 // Alias for a union type
 export type ID = number | string;
@@ -40,8 +47,13 @@ export type ShelfLocation = {
 // Alias for a function signature
 export type Formatter = (value: number) => string;
 
-// Using them
+
+// ============================================================
+// USING TYPE ALIASES
+// ============================================================
+
 const bookId: ID = "BK-2026-001";
+
 const location: ShelfLocation = {
   shelf: "A",
   row: 3,
@@ -49,12 +61,16 @@ const location: ShelfLocation = {
 
 console.log(location);
 
-const formatFine: Formatter = (value) => `₱${value.toFixed(2)}`;
+const formatFine: Formatter = (value) =>
+  `₱${value.toFixed(2)}`;
 
 console.log(bookId);
 console.log(formatFine(25));
 
-// ===== UNION TYPES =====
+
+// ============================================================
+// UNION TYPES
+// ============================================================
 
 export type StringOrNumber = string | number;
 
@@ -63,15 +79,21 @@ export type BookStatus =
   | "borrowed"
   | "reserved";
 
+
 // Function using a union type
-export function printId(id: StringOrNumber): void {
+export function printId(
+  id: StringOrNumber
+): void {
   console.log(`ID: ${id}`);
 }
 
 printId(101);
 printId("BK-2026-001");
 
-// ===== INTERSECTION TYPES =====
+
+// ============================================================
+// INTERSECTION TYPES
+// ============================================================
 
 // BookWithBorrower combines Book + extra properties
 export type BookWithBorrower = Book & {
@@ -98,10 +120,15 @@ const borrowedBook: BookWithBorrower = {
 };
 
 console.log(
-  `${borrowedBook.title} is borrowed by ${borrowedBook.borrowedBy.name}. Due on ${borrowedBook.dueDate.toLocaleDateString()}`
+  `${borrowedBook.title} is borrowed by ` +
+  `${borrowedBook.borrowedBy.name}. ` +
+  `Due on ${borrowedBook.dueDate.toLocaleDateString()}`
 );
 
-// ===== GENERIC INTERFACE =====
+
+// ============================================================
+// GENERIC INTERFACE
+// ============================================================
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -109,30 +136,36 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
-// ===== UTILITY TYPES =====
+
+// ============================================================
+// UTILITY TYPES
+// ============================================================
 
 // Partial<T>
 export type BookUpdate = Partial<Book>;
 
-// Pick<T,K>
+// Pick<T, K>
 export type BookPreview = Pick<
   Book,
   "id" | "title" | "author"
 >;
 
-// Omit<T,K>
+// Omit<T, K>
 export type PublicBook = Omit<
   Book,
   "available"
 >;
 
-// Record<K,T>
+// Record<K, T>
 export type GenreCount = Record<
   "Fantasy" | "Science Fiction" | "Mystery",
   number
 >;
 
-// ===== STATUS TYPES =====
+
+// ============================================================
+// STATUS TYPES
+// ============================================================
 
 // Replaces enum
 export type BorrowStatus =
@@ -145,3 +178,71 @@ export type MembershipType =
   | "student"
   | "faculty"
   | "guest";
+
+
+// ============================================================
+// API TYPES
+// ============================================================
+
+// JSON Server does not return JavaScript Date objects.
+// Date values are returned as ISO strings.
+
+// ------------------------------------------------------------
+// Book received from the API
+// ------------------------------------------------------------
+
+export type ApiBook = Omit<
+  Book,
+  "id"
+> & {
+  id: string | number;
+};
+
+
+// ------------------------------------------------------------
+// Member received from the API
+// ------------------------------------------------------------
+
+export type ApiMember = Omit<
+  Member,
+  "id"
+> & {
+  id: string | number;
+};
+
+
+// ------------------------------------------------------------
+// Borrow Record received from the API
+// ------------------------------------------------------------
+
+export type ApiBorrowRecord = Omit<
+  BorrowRecord,
+  "id" | "borrowDate" | "returnDate"
+> & {
+  id: string | number;
+  borrowDate: string;
+  returnDate: string;
+};
+
+
+// ============================================================
+// TYPES FOR CREATING DATA
+// ============================================================
+
+// The server generates the ID when creating a new book.
+export type NewBook = Omit<
+  Book,
+  "id"
+>;
+
+// The server generates the ID when creating a new member.
+export type NewMember = Omit<
+  Member,
+  "id"
+>;
+
+// The server generates the ID when creating a new borrow record.
+export type NewBorrowRecord = Omit<
+  BorrowRecord,
+  "id"
+>;

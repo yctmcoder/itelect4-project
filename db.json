@@ -1,0 +1,65 @@
+{
+  "books": [
+    {
+      "id": "1",
+      "title": "The Hobbit",
+      "author": "J.R.R. Tolkien",
+      "genre": "Fantasy",
+      "available": true
+    },
+    {
+      "id": "2",
+      "title": "Harry Potter and the Sorcerer's Stone",
+      "author": "J.K. Rowling",
+      "genre": "Fantasy",
+      "available": true
+    },
+    {
+      "id": "3",
+      "title": "The Little Prince",
+      "author": "Antoine de Saint-Exupéry",
+      "genre": "Fiction",
+      "available": false
+    },
+    {
+      "id": "4",
+      "title": "Clean Code",
+      "author": "Robert C. Martin",
+      "genre": "Programming",
+      "available": true
+    },
+    {
+      "id": "5",
+      "title": "Introduction to Algorithms",
+      "author": "Thomas H. Cormen",
+      "genre": "Computer Science",
+      "available": true
+    }
+  ],
+  "members": [
+    {
+      "id": "101",
+      "name": "Juan dela Cruz",
+      "email": "juan@example.com",
+      "membershipType": "student",
+      "active": true
+    },
+    {
+      "id": "102",
+      "name": "Maria Santos",
+      "email": "maria@example.com",
+      "membershipType": "student",
+      "active": true
+    }
+  ],
+  "borrowRecords": [
+    {
+      "id": "1",
+      "memberId": "101",
+      "bookId": "3",
+      "borrowDate": "2026-08-01T09:00:00.000Z",
+      "returnDate": "2026-08-15T09:00:00.000Z",
+      "fine": 0
+    }
+  ]
+}
