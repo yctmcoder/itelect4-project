@@ -1,38 +1,16 @@
 // src/data/mockData.ts
 
 import type {
-  Book,
   Member,
   BorrowRecord,
 } from "../types";
 
-// ===== MOCK BOOKS =====
+// =====================================================
+// MOCK MEMBER
+// =====================================================
 
-export const allBooks: Book[] = [
-  {
-    id: 1,
-    title: "The Hobbit",
-    author: "J.R.R. Tolkien",
-    genre: "Fantasy",
-    available: true,
-  },
-  {
-    id: 2,
-    title: "Harry Potter and the Sorcerer's Stone",
-    author: "J.K. Rowling",
-    genre: "Fantasy",
-    available: true,
-  },
-  {
-    id: 3,
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    genre: "Classic",
-    available: false,
-  },
-];
-
-// ===== MOCK MEMBER =====
+// There is no /users endpoint yet.
+// The member remains hard-coded for now.
 
 export const member: Member = {
   id: 101,
@@ -42,7 +20,13 @@ export const member: Member = {
   active: true,
 };
 
-// ===== MOCK BORROW RECORD =====
+// =====================================================
+// MOCK BORROW RECORD
+// =====================================================
+
+// Borrow record remains hard-coded for now.
+// It can be moved to json-server later when the
+// borrow-record API is implemented.
 
 export const borrowRecord: BorrowRecord = {
   id: 1,

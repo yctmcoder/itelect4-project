@@ -1,18 +1,56 @@
 // src/pages/BorrowedBooksPage.tsx
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import { Link } from "react-router";
 
 import type { Book } from "../types/index";
 
+import {
+  bookSchema,
+  type BookFormValues,
+} from "../schemas/bookSchemas";
+
 import BookCard from "../components/BookCard";
 
-import { fetchBooks, updateBook } from "../api/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+import {
+  fetchBooks,
+  updateBook,
+} from "../api/client";
 
 function BorrowedBooksPage() {
   // ===== QUERY CLIENT =====
 
   const queryClient = useQueryClient();
+
+  // ===== FORM =====
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<BookFormValues>({
+    resolver: zodResolver(bookSchema),
+    mode: "onBlur",
+
+    defaultValues: {
+      title: "",
+      author: "",
+      genre: "",
+    },
+  });
 
   // ===== READ BOOKS =====
 
@@ -35,17 +73,29 @@ function BorrowedBooksPage() {
       }),
 
     onSuccess: () => {
-      // The books list is now out of date.
-      // Tell React Query to fetch it again.
       queryClient.invalidateQueries({
         queryKey: ["books"],
       });
+
+      reset();
     },
   });
 
-  // ===== BORROW HANDLER =====
+  // ===== FORM SUBMIT =====
 
-  const handleBorrow = (book: Book): void => {
+  const onSubmit = (
+    values: BookFormValues
+  ): void => {
+    const book = data?.find(
+      (item) =>
+        item.title.toLowerCase() ===
+        values.title.toLowerCase()
+    );
+
+    if (book === undefined) {
+      return;
+    }
+
     borrowBook.mutate(book);
   };
 
@@ -91,19 +141,130 @@ function BorrowedBooksPage() {
         📖 Borrowed Books
       </h2>
 
-      {/* ===== MUTATION ERROR ===== */}
+      {/* ===== BORROW FORM ===== */}
 
-      {borrowBook.isError && (
-        <p className="mb-4 text-sm text-red-700 dark:text-red-400">
-          {borrowBook.error.message}
-        </p>
-      )}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="mb-6 grid max-w-lg gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+      >
+        {/* ===== FORM TITLE ===== */}
+
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Borrow a Book
+          </h3>
+
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Enter the book information to borrow a book.
+          </p>
+        </div>
+
+        {/* ===== BOOK TITLE ===== */}
+
+        <div className="grid gap-1.5">
+          <Label
+            htmlFor="title"
+            className="text-foreground"
+          >
+            Book Title
+          </Label>
+
+          <Input
+            id="title"
+            {...register("title")}
+            aria-invalid={
+              errors.title ? true : undefined
+            }
+            placeholder="Enter book title"
+          />
+
+          {errors.title && (
+            <p className="text-sm text-red-600">
+              {errors.title.message}
+            </p>
+          )}
+        </div>
+
+        {/* ===== AUTHOR ===== */}
+
+        <div className="grid gap-1.5">
+          <Label
+            htmlFor="author"
+            className="text-foreground"
+          >
+            Author
+          </Label>
+
+          <Input
+            id="author"
+            {...register("author")}
+            aria-invalid={
+              errors.author ? true : undefined
+            }
+            placeholder="Enter author"
+          />
+
+          {errors.author && (
+            <p className="text-sm text-red-600">
+              {errors.author.message}
+            </p>
+          )}
+        </div>
+
+        {/* ===== GENRE ===== */}
+
+        <div className="grid gap-1.5">
+          <Label
+            htmlFor="genre"
+            className="text-foreground"
+          >
+            Genre
+          </Label>
+
+          <Input
+            id="genre"
+            {...register("genre")}
+            aria-invalid={
+              errors.genre ? true : undefined
+            }
+            placeholder="Enter genre"
+          />
+
+          {errors.genre && (
+            <p className="text-sm text-red-600">
+              {errors.genre.message}
+            </p>
+          )}
+        </div>
+
+        {/* ===== MUTATION ERROR ===== */}
+
+        {borrowBook.isError && (
+          <p className="text-sm text-red-600">
+            {borrowBook.error.message}
+          </p>
+        )}
+
+        {/* ===== SUBMIT BUTTON ===== */}
+
+        <Button
+          type="submit"
+          disabled={borrowBook.isPending}
+          className="justify-self-start"
+        >
+          {borrowBook.isPending
+            ? "Borrowing..."
+            : "Borrow book"}
+        </Button>
+      </form>
 
       {/* ===== BOOK COUNT ===== */}
 
       <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
         {borrowedBooks.length} borrowed{" "}
-        {borrowedBooks.length === 1 ? "book" : "books"}
+        {borrowedBooks.length === 1
+          ? "book"
+          : "books"}
       </p>
 
       {/* ===== BOOK GRID ===== */}
@@ -119,7 +280,7 @@ function BorrowedBooksPage() {
               <BookCard
                 book={book}
                 onBorrow={() => {
-                  handleBorrow(book);
+                  borrowBook.mutate(book);
                 }}
               />
             </Link>
