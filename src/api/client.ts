@@ -24,21 +24,15 @@ export async function fetchBooks(): Promise<Book[]> {
   return res.json();
 }
 
-// GET /books?id=1
-export async function fetchBookById(id: number): Promise<Book> {
-  const res = await fetch(`${API_URL}/books?id=${id}`);
+// GET /books/:id
+export async function fetchBookById(id: string | number): Promise<Book> {
+  const res = await fetch(`${API_URL}/books/${id}`);
 
   if (!res.ok) {
-    throw new Error("Could not load book");
-  }
-
-  const matches: Book[] = await res.json();
-
-  if (matches.length === 0) {
     throw new Error(`No book found with id "${id}".`);
   }
 
-  return matches[0];
+  return res.json();
 }
 
 // GET /books?title=...
@@ -77,7 +71,7 @@ export async function createBook(
 
 // PATCH /books/:id
 export async function updateBook(
-  id: number,
+  id: string | number,
   updates: Partial<Omit<Book, "id">>
 ): Promise<Book> {
   const res = await fetch(`${API_URL}/books/${id}`, {
@@ -96,7 +90,7 @@ export async function updateBook(
 }
 
 // DELETE /books/:id
-export async function deleteBook(id: number): Promise<void> {
+export async function deleteBook(id: string | number): Promise<void> {
   const res = await fetch(`${API_URL}/books/${id}`, {
     method: "DELETE",
   });
@@ -121,23 +115,17 @@ export async function fetchMembers(): Promise<Member[]> {
   return res.json();
 }
 
-// GET /members?id=1
+// GET /members/:id
 export async function fetchMemberById(
-  id: number
+  id: string | number
 ): Promise<Member> {
-  const res = await fetch(`${API_URL}/members?id=${id}`);
+  const res = await fetch(`${API_URL}/members/${id}`);
 
   if (!res.ok) {
-    throw new Error("Could not load member");
-  }
-
-  const matches: Member[] = await res.json();
-
-  if (matches.length === 0) {
     throw new Error(`No member found with id "${id}".`);
   }
 
-  return matches[0];
+  return res.json();
 }
 
 // POST /members
@@ -161,7 +149,7 @@ export async function createMember(
 
 // PATCH /members/:id
 export async function updateMember(
-  id: number,
+  id: string | number,
   updates: Partial<Omit<Member, "id">>
 ): Promise<Member> {
   const res = await fetch(`${API_URL}/members/${id}`, {
@@ -180,7 +168,7 @@ export async function updateMember(
 }
 
 // DELETE /members/:id
-export async function deleteMember(id: number): Promise<void> {
+export async function deleteMember(id: string | number): Promise<void> {
   const res = await fetch(`${API_URL}/members/${id}`, {
     method: "DELETE",
   });
@@ -205,23 +193,17 @@ export async function fetchBorrowRecords(): Promise<BorrowRecord[]> {
   return res.json();
 }
 
-// GET /borrowRecords?id=1
+// GET /borrowRecords/:id
 export async function fetchBorrowRecordById(
-  id: number
+  id: string | number
 ): Promise<BorrowRecord> {
-  const res = await fetch(`${API_URL}/borrowRecords?id=${id}`);
+  const res = await fetch(`${API_URL}/borrowRecords/${id}`);
 
   if (!res.ok) {
-    throw new Error("Could not load borrow record");
-  }
-
-  const matches: BorrowRecord[] = await res.json();
-
-  if (matches.length === 0) {
     throw new Error(`No borrow record found with id "${id}".`);
   }
 
-  return matches[0];
+  return res.json();
 }
 
 // POST /borrowRecords
@@ -245,7 +227,7 @@ export async function createBorrowRecord(
 
 // PATCH /borrowRecords/:id
 export async function updateBorrowRecord(
-  id: number,
+  id: string | number,
   updates: Partial<Omit<BorrowRecord, "id">>
 ): Promise<BorrowRecord> {
   const res = await fetch(`${API_URL}/borrowRecords/${id}`, {
@@ -264,7 +246,7 @@ export async function updateBorrowRecord(
 }
 
 // DELETE /borrowRecords/:id
-export async function deleteBorrowRecord(id: number): Promise<void> {
+export async function deleteBorrowRecord(id: string | number): Promise<void> {
   const res = await fetch(`${API_URL}/borrowRecords/${id}`, {
     method: "DELETE",
   });

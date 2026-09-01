@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/DashboardPage";
 import BooksPage from "./pages/BooksPage";
 import BookDetailPage from "./pages/BookDetailPage";
+import MembersPage from "./pages/MembersPage";
 import BorrowedBooksPage from "./pages/BorrowedBooksPage";
 import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -39,6 +40,20 @@ function App() {
         <Route
           path="books/:id"
           element={<BookDetailPage />}
+        />
+
+        {/* ===== MEMBERS ===== */}
+
+        <Route
+          path="members"
+          element={<MembersPage />}
+        />
+
+        {/* ===== BORROW RECORDS ===== */}
+
+        <Route
+          path="borrow-records"
+          element={<BorrowedBooksPage />}
         />
 
         {/* ===== LOGIN ===== */}
