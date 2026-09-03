@@ -19,8 +19,6 @@ function BookDetailPage() {
   const navigate = useNavigate();
 
   // ===== FETCH BOOK =====
-  // The ID is included in the query key so each book
-  // gets its own React Query cache entry.
 
   const {
     data,
@@ -29,8 +27,8 @@ function BookDetailPage() {
     error,
   } = useQuery<Book>({
     queryKey: ["books", id],
-    queryFn: () => fetchBookById(Number(id)),
-    enabled: id !== undefined,
+    queryFn: () => fetchBookById(id!),
+    enabled: Boolean(id),
   });
 
   // ===== LOADING STATE =====
@@ -44,8 +42,6 @@ function BookDetailPage() {
   }
 
   // ===== ERROR STATE =====
-  // A missing/invalid book ID causes fetchBookById()
-  // to throw, and React Query places the error here.
 
   if (isError) {
     return (
@@ -69,7 +65,6 @@ function BookDetailPage() {
   }
 
   // ===== BOOK DETAILS =====
-  // Below this point, data is guaranteed to be Book.
 
   return (
     <div>
