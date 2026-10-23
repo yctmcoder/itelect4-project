@@ -1,108 +1,155 @@
-// src/api/client.ts
 
-import type {
-  Book,
-  Member,
-  BorrowRecord,
-} from "../types";
-
-// Change this if your JSON Server/API uses another URL
-const API_URL = "http://localhost:3000";
+import type { Book, Member, BorrowRecord } from "../types";
 
 // =====================================================
-// BOOKS
+// API CONFIGURATION
 // =====================================================
 
-// GET /books
+// Configure VITE_API_URL in .env.local
+// Example: VITE_API_URL=https://your-backend.vercel.app
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:4000"
+).replace(/\/$/, "");
+
+// Get JWT token saved after login
+function getAuthHeaders(includeJson = false): HeadersInit {
+  const token = localStorage.getItem("token");
+
+  return {
+    ...(includeJson
+      ? { "Content-Type": "application/json" }
+      : {}),
+    ...(token
+      ? { Authorization: `Bearer ${token}` }
+      : {}),
+  };
+}
+
+// Convert MongoDB's _id to the frontend's id
+function normalizeBook(
+  book: Book & { _id?: string }
+): Book {
+  return {
+    ...book,
+    id: book._id ?? book.id,
+  };
+}
+
+// Display backend errors when available
+async function getApiError(
+  response: Response,
+  fallbackMessage: string
+): Promise<Error> {
+  const body = await response.json().catch(() => null);
+
+  return new Error(
+    body?.message ||
+      `${fallbackMessage} (HTTP ${response.status})`
+  );
+}
+
+// =====================================================
+// BOOKS — EXPRESS + MONGODB ATLAS
+// =====================================================
+
+// GET /api/books
 export async function fetchBooks(): Promise<Book[]> {
-  const res = await fetch(`${API_URL}/books`);
+  const res = await fetch(`${API_URL}/api/books`, {
+    headers: getAuthHeaders(),
+  });
 
   if (!res.ok) {
-    throw new Error("Could not load books");
+    throw await getApiError(res, "Could not load books");
   }
 
-  return res.json();
+  const books = await res.json();
+
+  return books.map((book: Book & { _id?: string }) =>
+    normalizeBook(book)
+  );
 }
 
-// GET /books/:id
-export async function fetchBookById(id: string | number): Promise<Book> {
-  const res = await fetch(`${API_URL}/books/${id}`);
+// GET /api/books/:id
+export async function fetchBookById(
+  id: string | number
+): Promise<Book> {
+  const res = await fetch(`${API_URL}/api/books/${id}`, {
+    headers: getAuthHeaders(),
+  });
 
   if (!res.ok) {
-    throw new Error(`No book found with id "${id}".`);
+    throw await getApiError(res, "Could not find book");
   }
 
-  return res.json();
+  return normalizeBook(await res.json());
 }
 
-// GET /books?title=...
+// Search books belonging to the logged-in user
 export async function fetchBooksByTitle(
   title: string
 ): Promise<Book[]> {
-  const res = await fetch(
-    `${API_URL}/books?title=${encodeURIComponent(title)}`
+  const books = await fetchBooks();
+
+  return books.filter((book) =>
+    book.title.toLowerCase().includes(title.toLowerCase())
   );
-
-  if (!res.ok) {
-    throw new Error("Could not search books");
-  }
-
-  return res.json();
 }
 
-// POST /books
+// POST /api/books
 export async function createBook(
   newBook: Omit<Book, "id">
 ): Promise<Book> {
-  const res = await fetch(`${API_URL}/books`, {
+  const res = await fetch(`${API_URL}/api/books`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(true),
     body: JSON.stringify(newBook),
   });
 
   if (!res.ok) {
-    throw new Error("Could not save the book");
+    throw await getApiError(res, "Could not save book");
   }
 
-  return res.json();
+  return normalizeBook(await res.json());
 }
 
-// PATCH /books/:id
+// PATCH /api/books/:id
 export async function updateBook(
   id: string | number,
   updates: Partial<Omit<Book, "id">>
 ): Promise<Book> {
-  const res = await fetch(`${API_URL}/books/${id}`, {
+  const res = await fetch(`${API_URL}/api/books/${id}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(true),
     body: JSON.stringify(updates),
   });
 
   if (!res.ok) {
-    throw new Error("Could not update the book");
+    throw await getApiError(res, "Could not update book");
   }
 
-  return res.json();
+  return normalizeBook(await res.json());
 }
 
-// DELETE /books/:id
-export async function deleteBook(id: string | number): Promise<void> {
-  const res = await fetch(`${API_URL}/books/${id}`, {
+// DELETE /api/books/:id
+export async function deleteBook(
+  id: string | number
+): Promise<void> {
+  const res = await fetch(`${API_URL}/api/books/${id}`, {
     method: "DELETE",
+    headers: getAuthHeaders(),
   });
 
   if (!res.ok) {
-    throw new Error("Could not delete the book");
+    throw await getApiError(res, "Could not delete book");
   }
 }
 
 // =====================================================
-// MEMBERS
+// MEMBERS — NOT YET IMPLEMENTED IN EXPRESS BACKEND
 // =====================================================
+
+// These functions are preserved from your JSON Server
+// implementation. They require corresponding backend routes.
 
 // GET /members
 export async function fetchMembers(): Promise<Member[]> {
@@ -168,7 +215,9 @@ export async function updateMember(
 }
 
 // DELETE /members/:id
-export async function deleteMember(id: string | number): Promise<void> {
+export async function deleteMember(
+  id: string | number
+): Promise<void> {
   const res = await fetch(`${API_URL}/members/${id}`, {
     method: "DELETE",
   });
@@ -179,11 +228,16 @@ export async function deleteMember(id: string | number): Promise<void> {
 }
 
 // =====================================================
-// BORROW RECORDS
+// BORROW RECORDS — NOT YET IMPLEMENTED IN EXPRESS BACKEND
 // =====================================================
 
+// These functions are preserved from your JSON Server
+// implementation. They require corresponding backend routes.
+
 // GET /borrowRecords
-export async function fetchBorrowRecords(): Promise<BorrowRecord[]> {
+export async function fetchBorrowRecords(): Promise<
+  BorrowRecord[]
+> {
   const res = await fetch(`${API_URL}/borrowRecords`);
 
   if (!res.ok) {
@@ -200,7 +254,7 @@ export async function fetchBorrowRecordById(
   const res = await fetch(`${API_URL}/borrowRecords/${id}`);
 
   if (!res.ok) {
-    throw new Error(`No borrow record found with id "${id}".`);
+    throw new Error("Could not find borrow record");
   }
 
   return res.json();
@@ -246,7 +300,9 @@ export async function updateBorrowRecord(
 }
 
 // DELETE /borrowRecords/:id
-export async function deleteBorrowRecord(id: string | number): Promise<void> {
+export async function deleteBorrowRecord(
+  id: string | number
+): Promise<void> {
   const res = await fetch(`${API_URL}/borrowRecords/${id}`, {
     method: "DELETE",
   });
