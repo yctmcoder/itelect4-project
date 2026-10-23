@@ -96,12 +96,14 @@ function getFirst<T>(items: T[]): T | undefined {
   return items[0];
 }
 
-function getById<T extends { id: number }>(
+
+function getById<T extends { id: string | number }>(
   items: T[],
-  id: number
+  id: string | number
 ): T | undefined {
   return items.find((item) => item.id === id);
 }
+
 
 const firstBook = getFirst<Book>([book]);
 const foundBook = getById<Book>([book], 1);

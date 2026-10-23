@@ -1,3 +1,4 @@
+
 // src/types/index.ts
 
 // ============================================================
@@ -5,8 +6,12 @@
 // An interface defines the SHAPE of an object.
 // ============================================================
 
+// MongoDB uses string IDs, while older JSON Server data
+// may use numeric IDs.
+export type ID = number | string;
+
 export interface Book {
-  id: number;
+  id: ID;
   title: string;
   author: string;
   genre: string;
@@ -24,7 +29,7 @@ export interface Member {
 export interface BorrowRecord {
   id: number;
   memberId: number;
-  bookId: number;
+  bookId: ID;
   borrowDate: Date;
   returnDate: Date;
   fine?: number;
@@ -35,8 +40,8 @@ export interface BorrowRecord {
 // TYPE ALIASES
 // ============================================================
 
-// Alias for a union type
-export type ID = number | string;
+// Alias for a union type (defined above):
+// export type ID = number | string;
 
 // Alias for an object shape
 export type ShelfLocation = {
@@ -102,7 +107,7 @@ export type BookWithBorrower = Book & {
 };
 
 const borrowedBook: BookWithBorrower = {
-  id: 1,
+  id: "670f9b8e2c91d4a5e6f01234",
   title: "The Hobbit",
   author: "J.R.R. Tolkien",
   genre: "Fantasy",
@@ -184,8 +189,8 @@ export type MembershipType =
 // API TYPES
 // ============================================================
 
-// JSON Server does not return JavaScript Date objects.
-// Date values are returned as ISO strings.
+// JSON Server and MongoDB APIs return JSON.
+// Date values are received as ISO strings.
 
 // ------------------------------------------------------------
 // Book received from the API
@@ -195,7 +200,8 @@ export type ApiBook = Omit<
   Book,
   "id"
 > & {
-  id: string | number;
+  id: ID;
+  _id?: string;
 };
 
 
@@ -207,7 +213,7 @@ export type ApiMember = Omit<
   Member,
   "id"
 > & {
-  id: string | number;
+  id: ID;
 };
 
 
@@ -219,7 +225,7 @@ export type ApiBorrowRecord = Omit<
   BorrowRecord,
   "id" | "borrowDate" | "returnDate"
 > & {
-  id: string | number;
+  id: ID;
   borrowDate: string;
   returnDate: string;
 };
